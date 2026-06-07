@@ -12,6 +12,9 @@ repositories {
 	// Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
+    maven { url = uri("https://repo.repsy.io/kr1v/maven/") }
+    maven { url = uri("https://masa.dy.fi/maven/sakura-ryoko/") }
+    maven { url = uri("https://maven.fallenbreath.me/releases") }
 }
 
 loom {
@@ -33,7 +36,10 @@ dependencies {
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	implementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
-	
+
+    implementation("fi.dy.masa.malilib:malilib-fabric-${providers.gradleProperty("malilib_version").get()}")
+    implementation("net.kr1v:malilib-api:${providers.gradleProperty("malilib_api_version").get()}")
+    annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
 }
 
 tasks.processResources {

@@ -34,4 +34,10 @@ public class WorldOpenFlowsMixin {
 		if (!WorldPanoramaClient.isLoadingPanoramaWorld)
 			original.call(instance, screen);
 	}
+
+	@WrapOperation(method = "createFreshLevel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreenAndShow(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	private void wrapop5(Minecraft instance, Screen screen, Operation<Void> original) {
+		if (!WorldPanoramaClient.isLoadingPanoramaWorld)
+			original.call(instance, screen);
+	}
 }

@@ -12,7 +12,8 @@ import kr1v.malilibApi.config.plus.ConfigStringPlus;
 @Config("world-panorama")
 public class Main {
 	public static final ConfigBooleanPlus ENABLED = new ConfigBooleanPlus("Enable world for panorama");
-	public static final ConfigStringPlus WORLD_NAME = new ConfigStringPlus("World name to use");
+	public static final ConfigBooleanPlus GENERATE_NEW_EVERY_TIME = new ConfigBooleanPlus("Generate new world every time");
+	public static final ConfigStringPlus WORLD_NAME = new ConfigStringPlus("World name to use", "Panorama World");
 	public static final ConfigBooleanPlus ROTATE_PANORAMA = new ConfigBooleanPlus("Rotate panorama", true, "Applies to world panoramas, not \"real\" panoramas");
 	public static final ConfigFloat PANORAMA_YAW = new ConfigFloat("Panorama yaw", 0, 0, 360, "Only applies if Rotate panorama is set to false");
 	public static final ConfigFloat PANORAMA_PITCH = new ConfigFloat("Panorama pitch", 10, -90, 90, "");

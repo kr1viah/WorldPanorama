@@ -4,16 +4,21 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
-import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.*;
-import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
-import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.WorldDataConfiguration;
+import net.minecraft.world.level.levelgen.WorldOptions;
+import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
@@ -25,10 +30,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.io.IOException;
+
+import static net.minecraft.world.level.levelgen.WorldOptions.randomSeed;
+
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 	@Unique
-	private boolean hasLaunched;
 	private float spin;
 
 	@Shadow
@@ -41,20 +49,23 @@ public abstract class MinecraftMixin {
 	public abstract LevelStorageSource getLevelSource();
 
 	@Shadow
+	@Final
+	public Options options;
+
+	@Shadow
 	@Nullable
-	public ClientLevel level;
+	public LocalPlayer player;
+
+	@Shadow
+	@Final
+	public GameRenderer gameRenderer;
+
+	@Shadow
+	public abstract DeltaTracker getDeltaTracker();
 
 	@Shadow
 	@Nullable
 	public Screen screen;
-	/*TODO
-	- first time launch screen "enable narrator" shows default panorama, should maybe start loading there
-	- first launch does not generate world for panorama, should either generate or show default panorama
-	- load world as soon as the name is changed
-	- option to actually pause world when in panorama mode
-	 */
-
-	@Shadow @Final public Options options;
 
 	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
 	private void wrapop(Minecraft instance, Screen screen, Operation<Void> original) {
@@ -76,16 +87,19 @@ public abstract class MinecraftMixin {
 		original.call(instance, screen);
 	}
 
+	@Unique
+	private TitleScreen theTitleScreen; // prevent splash from resetting
+
 	@Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
 	private void inject2(Screen screen, CallbackInfo ci) {
-		if ((screen instanceof TitleScreen) && Main.ENABLED.getBooleanValue() && !WorldPanoramaClient.isInTitleScreen) {
+		if ((screen instanceof TitleScreen titleScreen) && Main.ENABLED.getBooleanValue() && !WorldPanoramaClient.isInTitleScreen) {
 			WorldPanoramaClient.isInTitleScreen = true;
 			startSingleplayer(Main.WORLD_NAME.getStringValue());
-			hasLaunched = true;
+			theTitleScreen = titleScreen;
 		}
 		if (screen instanceof PauseScreen && Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen) {
 			ci.cancel();
-			setScreen(new TitleScreen());
+			setScreen(theTitleScreen);
 		}
 	}
 
@@ -108,13 +122,15 @@ public abstract class MinecraftMixin {
 
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
-		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen != null) {
-			var player = Minecraft.getInstance().player;
+		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen == null) {
+			WorldPanoramaClient.hasTitleScreenOpen = false;
+		}
+		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && WorldPanoramaClient.hasTitleScreenOpen) {
 			if (player != null) {
 				player.setXRot(Main.PANORAMA_PITCH.getFloatValue());
 				if (Main.ROTATE_PANORAMA.getBooleanValue()) {
-					float a = Minecraft.getInstance().getDeltaTracker().getRealtimeDeltaTicks();
-					float delta = (float) (a * Minecraft.getInstance().gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
+					float a = getDeltaTracker().getRealtimeDeltaTicks();
+					float delta = (float) (a * gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
 					this.spin = Mth.wrapDegrees(this.spin + delta * 0.1f);
 					player.setYRot(spin);
 				} else {
@@ -122,16 +138,15 @@ public abstract class MinecraftMixin {
 				}
 			}
 			if (prevHideGui == null) {
-				prevHideGui = Minecraft.getInstance().options.hideGui;
+				prevHideGui = options.hideGui;
 			}
 
-			Minecraft.getInstance().options.hideGui = Main.HIDE_HUD.getBooleanValue();
+			options.hideGui = Main.HIDE_HUD.getBooleanValue();
 		} else {
 			if (prevHideGui != null) {
-				Minecraft.getInstance().options.hideGui = prevHideGui;
+				options.hideGui = prevHideGui;
 				prevHideGui = null;
 			}
-			var player = Minecraft.getInstance().player;
 			if (player != null) {
 				spin = player.getYRot();
 			}
@@ -142,12 +157,36 @@ public abstract class MinecraftMixin {
 	private void startSingleplayer(@Nullable String name) {
 		if (isWorldNameValid(name)) {
 			WorldPanoramaClient.isLoadingPanoramaWorld = true;
-			createWorldOpenFlows().openWorld(name, () -> setScreen(new TitleScreen()));
+			if (Main.GENERATE_NEW_EVERY_TIME.getBooleanValue()) {
+				try (var access =  getLevelSource().createAccess(name)){
+					access.deleteLevel();
+				} catch (IOException _) {
+				}
+				createWorldOpenFlows().createFreshLevel(
+						name,
+						new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+						new WorldOptions(randomSeed(), true, false),
+						WorldPresets::createNormalWorldDimensions,
+						theTitleScreen
+				);
+			} else {
+				if (getLevelSource().levelExists(name)) {
+					createWorldOpenFlows().openWorld(name, () -> setScreen(new TitleScreen()));
+				} else {
+					createWorldOpenFlows().createFreshLevel(
+							name,
+							new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+							new WorldOptions(randomSeed(), true, false),
+							WorldPresets::createNormalWorldDimensions,
+							theTitleScreen
+					);
+				}
+			}
 		}
 	}
 
 	@Unique
 	private boolean isWorldNameValid(@Nullable String name) {
-		return name != null && !name.isBlank() && getLevelSource().levelExists(name);
+		return name != null && !name.isBlank();
 	}
 }

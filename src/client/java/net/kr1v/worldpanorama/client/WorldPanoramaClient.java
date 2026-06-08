@@ -5,6 +5,7 @@ import net.fabricmc.api.ClientModInitializer;
 public class WorldPanoramaClient implements ClientModInitializer {
 	public static boolean isLoadingPanoramaWorld;
 	public static boolean isInTitleScreen;
+	public static boolean hasTitleScreenOpen;
 
 	@Override
 	public void onInitializeClient() {

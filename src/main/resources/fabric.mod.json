@@ -14,16 +14,8 @@
 	"license": "CC0-1.0",
 	"icon": "assets/world-panorama/icon.png",
 	"environment": "*",
-	"entrypoints": {
-		"main": [
-			"net.kr1v.worldpanorama.WorldPanorama"
-		],
-		"client": [
-			"net.kr1v.worldpanorama.client.WorldPanoramaClient"
-		]
-	},
+	"entrypoints": {},
 	"mixins": [
-		"world-panorama.mixins.json",
 		{
 			"config": "world-panorama.client.mixins.json",
 			"environment": "client"

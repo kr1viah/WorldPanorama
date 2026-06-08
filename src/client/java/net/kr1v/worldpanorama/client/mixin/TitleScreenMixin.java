@@ -21,6 +21,7 @@ public class TitleScreenMixin {
 	@Inject(method = "shouldCloseOnEsc", at = @At("HEAD"), cancellable = true)
 	private void shouldCloseOnEsc(CallbackInfoReturnable<Boolean> cir) {
 		if (Main.ENABLED.getBooleanValue()) {
+			//TODO: causes splash to change. evil. if no world is loaded pressing esc will just endlessly refresh the splash.
 			cir.setReturnValue(true);
 		}
 	}

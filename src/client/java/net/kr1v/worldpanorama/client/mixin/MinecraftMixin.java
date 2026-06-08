@@ -4,9 +4,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
+import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.*;
+import net.minecraft.client.gui.screens.options.OptionsScreen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.network.chat.Component;
@@ -14,6 +17,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -43,6 +47,14 @@ public abstract class MinecraftMixin {
 	@Shadow
 	@Nullable
 	public Screen screen;
+	/*TODO
+	- first time launch screen "enable narrator" shows default panorama, should maybe start loading there
+	- first launch does not generate world for panorama, should either generate or show default panorama
+	- load world as soon as the name is changed
+	- option to actually pause world when in panorama mode
+	 */
+
+	@Shadow @Final public Options options;
 
 	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
 	private void wrapop(Minecraft instance, Screen screen, Operation<Void> original) {
@@ -90,8 +102,6 @@ public abstract class MinecraftMixin {
 		original.call(instance, screen);
 	}
 
-	@Unique
-	private int prevFov = -1;
 
 	@Unique
 	private Boolean prevHideGui = null;
@@ -111,34 +121,33 @@ public abstract class MinecraftMixin {
 					player.setYRot(Main.PANORAMA_YAW.getFloatValue());
 				}
 			}
-
-			if (prevFov == -1) {
-				prevFov = Minecraft.getInstance().options.fov().get();
-			}
 			if (prevHideGui == null) {
 				prevHideGui = Minecraft.getInstance().options.hideGui;
 			}
 
 			Minecraft.getInstance().options.hideGui = Main.HIDE_HUD.getBooleanValue();
-			Minecraft.getInstance().options.fov().set(Main.PANORAMA_FOV.getIntegerValue());
-
 		} else {
 			if (prevHideGui != null) {
 				Minecraft.getInstance().options.hideGui = prevHideGui;
 				prevHideGui = null;
 			}
-			if (prevFov != -1) {
-				Minecraft.getInstance().options.fov().set(prevFov);
-				prevFov = -1;
+			var player = Minecraft.getInstance().player;
+			if (player != null) {
+				spin = player.getYRot();
 			}
 		}
 	}
 
 	@Unique
 	private void startSingleplayer(@Nullable String name) {
-		if (name != null && !name.isBlank() && getLevelSource().levelExists(name)) {
+		if (isWorldNameValid(name)) {
 			WorldPanoramaClient.isLoadingPanoramaWorld = true;
 			createWorldOpenFlows().openWorld(name, () -> setScreen(new TitleScreen()));
 		}
+	}
+
+	@Unique
+	private boolean isWorldNameValid(@Nullable String name) {
+		return name != null && !name.isBlank() && getLevelSource().levelExists(name);
 	}
 }

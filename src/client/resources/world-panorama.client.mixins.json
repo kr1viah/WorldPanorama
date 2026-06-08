@@ -11,6 +11,7 @@
     "requireAnnotations": true
   },
   "mixins": [
+    "CameraMixin",
     "ClientPacketListenerMixin",
     "GenericMessageScreenMixin",
     "MinecraftMixin",

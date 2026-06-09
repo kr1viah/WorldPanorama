@@ -13,7 +13,6 @@
   "mixins": [
     "CameraMixin",
     "ClientPacketListenerMixin",
-    "GenericMessageScreenMixin",
     "MinecraftMixin",
     "PanoramaMixin",
     "TitleScreenMixin",

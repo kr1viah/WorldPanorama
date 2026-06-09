@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
+import net.kr1v.worldpanorama.client.interfaces.Tweened;
 import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
@@ -101,6 +102,7 @@ public abstract class MinecraftMixin {
 		if (screen instanceof PauseScreen && Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen) {
 			ci.cancel();
 			setScreen(theTitleScreen);
+			((Tweened) theTitleScreen).world_panorama$getTweener().snapToValue(0);
 		}
 	}
 
@@ -122,7 +124,7 @@ public abstract class MinecraftMixin {
 	private Boolean prevHideGui = null;
 
 	@Unique
-	private Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
+	private final Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
 
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {

@@ -9,7 +9,6 @@
         "Tektonikal"
 	],
 	"contact": {
-		"homepage": "https://kr1v.net/",
 		"sources": "https://github.com/kr1viah/WorldPanorama/"
 	},
 	"license": "MIT",
@@ -26,7 +25,6 @@
 		"fabricloader": ">=0.19.3",
 		"minecraft": "~26.1",
 		"java": ">=25",
-		"fabric-api": "*",
         "malilib": "*",
         "malilib-api": "*"
 	}

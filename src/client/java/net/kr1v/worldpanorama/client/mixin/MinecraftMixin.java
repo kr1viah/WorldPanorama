@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
+import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -120,6 +121,9 @@ public abstract class MinecraftMixin {
 	@Unique
 	private Boolean prevHideGui = null;
 
+	@Unique
+	private Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
+
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen == null) {
@@ -127,7 +131,8 @@ public abstract class MinecraftMixin {
 		}
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && WorldPanoramaClient.hasTitleScreenOpen) {
 			if (player != null) {
-				player.setXRot(Main.PANORAMA_PITCH.getFloatValue());
+				pitchTweener.update();
+				player.setXRot(((float) pitchTweener.get()));
 				if (Main.ROTATE_PANORAMA.getBooleanValue()) {
 					float a = getDeltaTracker().getRealtimeDeltaTicks();
 					float delta = (float) (a * gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
@@ -149,6 +154,7 @@ public abstract class MinecraftMixin {
 			}
 			if (player != null) {
 				spin = player.getYRot();
+				pitchTweener.snapToValue(player.getXRot());
 			}
 		}
 	}
@@ -158,7 +164,7 @@ public abstract class MinecraftMixin {
 		if (isWorldNameValid(name)) {
 			WorldPanoramaClient.isLoadingPanoramaWorld = true;
 			if (Main.GENERATE_NEW_EVERY_TIME.getBooleanValue()) {
-				try (var access =  getLevelSource().createAccess(name)){
+				try (var access = getLevelSource().createAccess(name)) {
 					access.deleteLevel();
 				} catch (IOException _) {
 				}

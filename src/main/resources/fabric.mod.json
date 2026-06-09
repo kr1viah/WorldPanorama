@@ -3,18 +3,22 @@
 	"id": "world-panorama",
 	"version": "${version}",
 	"name": "World Panorama",
-	"description": "This is an example description! Tell everyone what your mod is about!",
+	"description": "Load a real world instead of a static image for the panorama",
 	"authors": [
-		"Me!"
+		"kr1v",
+		"Tektonikal",
+		"esoij"
 	],
 	"contact": {
-		"homepage": "https://fabricmc.net/",
-		"sources": "https://github.com/FabricMC/fabric-example-mod"
+		"homepage": "https://kr1v.net/",
+		"sources": "https://github.com/kr1viah/WorldPanorama"
 	},
-	"license": "CC0-1.0",
+	"license": "MIT",
 	"icon": "assets/world-panorama/icon.png",
-	"environment": "*",
-	"entrypoints": {},
+	"environment": "client",
+	"entrypoints": {
+		"modmenu": ["net.kr1v.worldpanorama.client.config.ModMenuIntegration"]
+	},
 	"mixins": [
 		{
 			"config": "world-panorama.client.mixins.json",
@@ -23,10 +27,9 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.19.3",
-		"minecraft": "~26.1",
+		"minecraft": ">26.1 <26.3",
 		"java": ">=25",
 		"fabric-api": "*",
-        "malilib": "*",
-        "malilib-api": "*"
+		"yet_another_config_lib_v3": "*"
 	}
 }

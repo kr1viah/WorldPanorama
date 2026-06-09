@@ -1,21 +1,23 @@
 {
-  "required": true,
-  "package": "net.kr1v.worldpanorama.client.mixin",
-  "compatibilityLevel": "JAVA_25",
-  "client": [
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  },
-  "overwrites": {
-    "requireAnnotations": true
-  },
-  "mixins": [
-    "CameraMixin",
-    "ClientPacketListenerMixin",
-    "MinecraftMixin",
-    "PanoramaMixin",
-    "TitleScreenMixin",
-    "WorldOpenFlowsMixin"
-  ]
+	"required": true,
+	"package": "net.kr1v.worldpanorama.client.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	},
+	"mixins": [
+		"CameraMixin",
+		"ClientPacketListenerMixin",
+		"GenericMessageScreenMixin",
+		"GuiMixin",
+		"MinecraftMixin",
+		"PanoramaMixin",
+		"TitleScreenMixin",
+		"WorldOpenFlowsMixin"
+	]
 }

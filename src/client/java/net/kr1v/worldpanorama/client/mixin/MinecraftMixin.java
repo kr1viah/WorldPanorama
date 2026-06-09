@@ -3,23 +3,17 @@ package net.kr1v.worldpanorama.client.mixin;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
-import net.kr1v.worldpanorama.client.config.Main;
+import net.kr1v.worldpanorama.client.config.WorldPanoramaConfig;
+import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.Options;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.*;
-import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.WorldDataConfiguration;
-import net.minecraft.world.level.levelgen.WorldOptions;
-import net.minecraft.world.level.levelgen.presets.WorldPresets;
-import net.minecraft.world.level.storage.LevelStorageSource;
 import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
@@ -30,27 +24,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import java.io.IOException;
-
-import static net.minecraft.world.level.levelgen.WorldOptions.randomSeed;
-
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin {
 	@Unique
 	private float spin;
-
-	@Shadow
-	public abstract void setScreen(@Nullable Screen screen);
-
-	@Shadow
-	public abstract WorldOpenFlows createWorldOpenFlows();
-
-	@Shadow
-	public abstract LevelStorageSource getLevelSource();
-
-	@Shadow
-	@Final
-	public Options options;
 
 	@Shadow
 	@Nullable
@@ -62,13 +39,13 @@ public abstract class MinecraftMixin {
 
 	@Shadow
 	public abstract DeltaTracker getDeltaTracker();
-
+	
 	@Shadow
-	@Nullable
-	public Screen screen;
-
-	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
-	private void wrapop(Minecraft instance, Screen screen, Operation<Void> original) {
+	@Final
+	public Gui gui;
+	
+	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	private void wrapop(Gui instance, Screen screen, Operation<Void> original) {
 		if (!WorldPanoramaClient.isLoadingPanoramaWorld)
 			original.call(instance, screen);
 	}
@@ -77,7 +54,7 @@ public abstract class MinecraftMixin {
 	private void inject(Minecraft instance, Screen screen, Operation<Void> original) {
 		if (WorldPanoramaClient.isInTitleScreen && !WorldPanoramaClient.isLoadingPanoramaWorld) {
 			WorldPanoramaClient.isInTitleScreen = false;
-			setScreen(new ProgressScreen(true));
+			gui.setScreen(new ProgressScreen(true));
 			return;
 		}
 		if (WorldPanoramaClient.isLoadingPanoramaWorld) {
@@ -87,25 +64,9 @@ public abstract class MinecraftMixin {
 		original.call(instance, screen);
 	}
 
-	@Unique
-	private TitleScreen theTitleScreen; // prevent splash from resetting
-
-	@Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
-	private void inject2(Screen screen, CallbackInfo ci) {
-		if ((screen instanceof TitleScreen titleScreen) && Main.ENABLED.getBooleanValue() && !WorldPanoramaClient.isInTitleScreen) {
-			WorldPanoramaClient.isInTitleScreen = true;
-			startSingleplayer(Main.WORLD_NAME.getStringValue());
-			theTitleScreen = titleScreen;
-		}
-		if (screen instanceof PauseScreen && Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen) {
-			ci.cancel();
-			setScreen(theTitleScreen);
-		}
-	}
-
-	@WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
-	private void wrapop2(Minecraft instance, Screen screen, Operation<Void> original) {
-		if (Main.ENABLED.getBooleanValue()) {
+	@WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	private void wrapop2(Gui instance, Screen screen, Operation<Void> original) {
+		if (WorldPanoramaConfig.ENABLED) {
 			original.call(instance, new Screen(Component.empty()) {
 				@Override
 				public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
@@ -119,74 +80,42 @@ public abstract class MinecraftMixin {
 
 	@Unique
 	private Boolean prevHideGui = null;
+	
+	@Unique
+	private Tweener pitchTweener = new Tweener(() -> WorldPanoramaConfig.PANORAMA_PITCH, () -> WorldPanoramaConfig.ANIMATION_SPEED);
 
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
-		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen == null) {
+		if (WorldPanoramaConfig.ENABLED && WorldPanoramaClient.isInTitleScreen && gui.screen() == null) {
 			WorldPanoramaClient.hasTitleScreenOpen = false;
 		}
-		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && WorldPanoramaClient.hasTitleScreenOpen) {
+		if (WorldPanoramaConfig.ENABLED && WorldPanoramaClient.isInTitleScreen && WorldPanoramaClient.hasTitleScreenOpen) {
 			if (player != null) {
-				player.setXRot(Main.PANORAMA_PITCH.getFloatValue());
-				if (Main.ROTATE_PANORAMA.getBooleanValue()) {
+				pitchTweener.update();
+				player.setXRot((float) pitchTweener.get());
+				if (WorldPanoramaConfig.ROTATE_PANORAMA) {
 					float a = getDeltaTracker().getRealtimeDeltaTicks();
-					float delta = (float) (a * gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
+					float delta = (float) (a * gameRenderer.gameRenderState().optionsRenderState.panoramaSpeed);
 					this.spin = Mth.wrapDegrees(this.spin + delta * 0.1f);
 					player.setYRot(spin);
 				} else {
-					player.setYRot(Main.PANORAMA_YAW.getFloatValue());
+					player.setYRot(WorldPanoramaConfig.PANORAMA_YAW);
 				}
 			}
 			if (prevHideGui == null) {
-				prevHideGui = options.hideGui;
+				prevHideGui = gui.hud.isHidden();
 			}
 
-			options.hideGui = Main.HIDE_HUD.getBooleanValue();
+			if (gui.hud.isHidden() != WorldPanoramaConfig.HIDE_HUD) gui.hud.toggle();
 		} else {
 			if (prevHideGui != null) {
-				options.hideGui = prevHideGui;
+				if (gui.hud.isHidden() != prevHideGui) gui.hud.toggle();
 				prevHideGui = null;
 			}
 			if (player != null) {
 				spin = player.getYRot();
+				pitchTweener.snapToValue(player.getXRot());
 			}
 		}
-	}
-
-	@Unique
-	private void startSingleplayer(@Nullable String name) {
-		if (isWorldNameValid(name)) {
-			WorldPanoramaClient.isLoadingPanoramaWorld = true;
-			if (Main.GENERATE_NEW_EVERY_TIME.getBooleanValue()) {
-				try (var access =  getLevelSource().createAccess(name)){
-					access.deleteLevel();
-				} catch (IOException _) {
-				}
-				createWorldOpenFlows().createFreshLevel(
-						name,
-						new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
-						new WorldOptions(randomSeed(), true, false),
-						WorldPresets::createNormalWorldDimensions,
-						theTitleScreen
-				);
-			} else {
-				if (getLevelSource().levelExists(name)) {
-					createWorldOpenFlows().openWorld(name, () -> setScreen(new TitleScreen()));
-				} else {
-					createWorldOpenFlows().createFreshLevel(
-							name,
-							new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
-							new WorldOptions(randomSeed(), true, false),
-							WorldPresets::createNormalWorldDimensions,
-							theTitleScreen
-					);
-				}
-			}
-		}
-	}
-
-	@Unique
-	private boolean isWorldNameValid(@Nullable String name) {
-		return name != null && !name.isBlank();
 	}
 }

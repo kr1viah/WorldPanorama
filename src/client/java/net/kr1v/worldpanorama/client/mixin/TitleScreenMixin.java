@@ -52,7 +52,6 @@ public abstract class TitleScreenMixin extends Screen implements Tweened {
 		}
 	}
 
-	//TODO: only make this happen when opening title screen from panorama world
 	@WrapMethod(method = "extractRenderState")
 	private void wrap(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
 		scaleTweener.update();

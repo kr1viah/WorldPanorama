@@ -21,7 +21,6 @@ public class Main {
 	public static final ConfigFloat PANORAMA_PITCH = new ConfigFloat("Panorama pitch", 10, -90, 90, "Vertical rotation when in the title screen");
 	public static final ConfigBooleanPlus HIDE_HUD = new ConfigBooleanPlus("Hide HUD", true, "Hides all GUI elements when in the title screen");
 	public static final ConfigIntegerPlus PANORAMA_FOV = new ConfigIntegerPlus("FOV", 30, 30, 110, "FOV used only when in a title screen");
-	//TODO: in / out speed? various easings?
 	public static final ConfigFloat ANIMATION_SPEED = new ConfigFloat("Animation Speed", 20, 1, 30, "How fast the the FOV, pitch, and screen scale transitions will be");
 
 	@Label
@@ -29,7 +28,6 @@ public class Main {
 	public static final ConfigStringPlus WORLD_NAME = new ConfigStringPlus("World name to use", "Panorama World", "The name of the world to load on startup");
 	public static final ConfigBooleanPlus GENERATE_NEW_EVERY_TIME = new ConfigBooleanPlus("Generate on start", false, "Generate a new world for the panorama every time the game is launched");
 	public static final ConfigBooleanPlus SHOULD_PAUSE = new ConfigBooleanPlus("Pause world", false, "Pauses the world if enabled. Good for survival worlds");
-	//TODO: maybe configurable render distance for panorama world?
 
 	@SuppressWarnings("unused")
 	@Label

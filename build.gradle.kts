@@ -15,6 +15,7 @@ repositories {
     maven { url = uri("https://repo.repsy.io/kr1v/maven/") }
     maven { url = uri("https://masa.dy.fi/maven/sakura-ryoko/") }
     maven { url = uri("https://maven.fallenbreath.me/releases") }
+    maven { url = uri("https://maven.terraformersmc.com/") }
 }
 
 loom {
@@ -40,6 +41,8 @@ dependencies {
     implementation("fi.dy.masa.malilib:malilib-fabric-${providers.gradleProperty("malilib_version").get()}")
     implementation("net.kr1v:malilib-api:${providers.gradleProperty("malilib_api_version").get()}")
     annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
+
+    implementation("com.terraformersmc:modmenu:18.0.0-beta.1")
 }
 
 tasks.processResources {

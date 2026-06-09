@@ -15,7 +15,7 @@ public class CameraMixin {
 	@Unique
 	private float targetFov = Main.PANORAMA_FOV.get();
 	@Unique
-	private final Tweener fovTweener = new Tweener(() -> targetFov);
+	private final Tweener fovTweener = new Tweener(() -> targetFov, Main.ANIMATION_SPEED::getFloatValue);
 
 	@WrapOperation(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;calculateFov(F)F"))
 	float yeah(Camera instance, float partialTicks, Operation<Float> original){

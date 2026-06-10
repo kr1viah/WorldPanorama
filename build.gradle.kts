@@ -1,9 +1,10 @@
 plugins {
-	id("net.fabricmc.fabric-loom")
+    id("dev.kikugie.loom-back-compat")
+    id("dev.kikugie.stonecutter")
 	`maven-publish`
 }
 
-version = providers.gradleProperty("mod_version").get()
+version = providers.gradleProperty("mod_version").get() + "+${sc.current.version}"
 group = providers.gradleProperty("maven_group").get()
 
 repositories {
@@ -30,19 +31,19 @@ loom {
 }
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft("com.mojang:minecraft:${providers.gradleProperty("minecraft_version").get()}")
-	
-	implementation("net.fabricmc:fabric-loader:${providers.gradleProperty("loader_version").get()}")
+	minecraft("com.mojang:minecraft:${project.property("minecraft_version")}")
+    loomx.applyMojangMappings()
+
+	modImplementation("net.fabricmc:fabric-loader:${project.property("loader_version")}")
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	implementation("net.fabricmc.fabric-api:fabric-api:${providers.gradleProperty("fabric_api_version").get()}")
+	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
-    implementation("fi.dy.masa.malilib:malilib-fabric-${providers.gradleProperty("malilib_version").get()}")
-    implementation("net.kr1v:malilib-api:${providers.gradleProperty("malilib_api_version").get()}")
+    modImplementation("fi.dy.masa.malilib:malilib-fabric-${project.property("malilib_version")}")
+    modImplementation("net.kr1v:malilib-api:${project.property("malilib_api_version")}")
     annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
 
-    implementation("com.terraformersmc:modmenu:18.0.0-beta.1")
+    modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
 tasks.processResources {

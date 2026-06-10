@@ -1,6 +1,7 @@
 plugins {
     id("dev.kikugie.loom-back-compat")
     id("dev.kikugie.stonecutter")
+    id("me.modmuss50.mod-publish-plugin") version "2.0.0"
 	`maven-publish`
 }
 
@@ -101,6 +102,37 @@ tasks.jar {
 	from("LICENSE") {
 		rename { "${it}_$projectName" }
 	}
+}
+
+val lastTask: Task = (if (sc.current.parsed.matches("<=1.21.11")) tasks.named<Task>("remapJar") else tasks.jar).get()
+
+publishMods {
+    file.set((lastTask as AbstractArchiveTask).archiveFile)
+    type.set(STABLE)
+    modLoaders.add("fabric")
+
+    changelog.set("")
+    displayName.set(project.property("mod_version") as String)
+
+    if (providers.environmentVariable("RELEASE_MODRINTH").orNull?.toBoolean() ?: false) {
+        modrinth {
+            accessToken.set(providers.environmentVariable("MODRINTH_TOKEN"))
+            projectId.set("TSGA5yXc")
+            minecraftVersions.add(project.property("minecraft_version") as String)
+
+            requires("fabric-api")
+            requires("malilib")
+            requires("malilib-api")
+            optional("modmenu")
+        }
+    }
+
+    if (providers.environmentVariable("RELEASE_GITHUB").orNull?.toBoolean() ?: false) {
+        github {
+            accessToken.set(providers.environmentVariable("GITHUB_TOKEN"))
+            parent(rootProject.tasks.named("publishGithub"))
+        }
+    }
 }
 
 // configure the maven publication

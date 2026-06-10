@@ -18,7 +18,10 @@ jobs:
       options: --user root
     steps:
       - uses: actions/checkout@v4
-      - run: ./gradlew build publishMods
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+      - name: publish the thing
+        run: ./gradlew build publishMods
         env:
           MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
           RELEASE_MODRINTH: ${{ inputs.release_modrinth }}

@@ -46,17 +46,42 @@ dependencies {
     modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
 }
 
+val javaVersion = when (sc.current.parsed.matches(">=26.1")) {
+    true -> { JavaVersion.VERSION_25 }
+    false -> { JavaVersion.VERSION_21 }
+}
+
 tasks.processResources {
 	val version = version
+	val javaVersion = javaVersion.majorVersion
+    var minecraftVersionRange = when (sc.current.version) {
+        "26.1.2" -> {
+            "~26.1"
+        }
+        "1.21.11" -> {
+            "1.21.11"
+        }
+        else -> {
+            throw GradleException("Version not specified!")
+        }
+    }
 	inputs.property("version", version)
+	inputs.property("java_version", javaVersion)
+	inputs.property("minecraft_version_range", minecraftVersionRange)
 
 	filesMatching("fabric.mod.json") {
-		expand("version" to version)
+        expand(
+            mapOf(
+                "version" to version,
+                "java_version" to javaVersion,
+                "minecraft_version_range" to minecraftVersionRange
+            )
+        )
 	}
 }
 
 tasks.withType<JavaCompile>().configureEach {
-	options.release = 25
+	options.release = javaVersion.majorVersion.toInt()
 }
 
 java {
@@ -65,8 +90,8 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_25
-	targetCompatibility = JavaVersion.VERSION_25
+	sourceCompatibility = javaVersion
+	targetCompatibility = javaVersion
 }
 
 tasks.jar {

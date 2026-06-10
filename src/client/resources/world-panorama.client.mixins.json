@@ -16,6 +16,7 @@
     "MinecraftMixin",
     "PanoramaMixin",
     "TitleScreenMixin",
-    "WorldOpenFlowsMixin"
+    "WorldOpenFlowsMixin",
+    "mc1_21_11.GameRendererMixin"
   ]
 }

@@ -1,24 +1,27 @@
 package net.kr1v.worldpanorama.client.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+//? if >=26.1 {
+/*import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
 import net.kr1v.worldpanorama.client.util.Tweener;
-import net.minecraft.client.Camera;
-import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
+*///? }
+import net.minecraft.client.Camera;
+import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(Camera.class)
 public class CameraMixin {
-	@Unique
+	//? if >=26.1 {
+	/*@Unique
 	private float targetFov = Main.PANORAMA_FOV.get();
 	@Unique
 	private final Tweener fovTweener = new Tweener(() -> targetFov, Main.ANIMATION_SPEED::getFloatValue);
 
 	@WrapOperation(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Camera;calculateFov(F)F"))
-	float yeah(Camera instance, float partialTicks, Operation<Float> original){
+	float yeah(Camera instance, float partialTicks, Operation<Float> original) {
 		if (Main.ENABLED.get() && WorldPanoramaClient.isInTitleScreen) {
 			if (WorldPanoramaClient.hasTitleScreenOpen) {
 				targetFov = Main.PANORAMA_FOV.get();
@@ -29,4 +32,5 @@ public class CameraMixin {
 		}
 		return original.call(instance, partialTicks);
 	}
+	*///? }
 }

@@ -7,7 +7,6 @@ import net.kr1v.worldpanorama.client.config.Main;
 import net.kr1v.worldpanorama.client.interfaces.Tweened;
 import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.network.chat.Component;
@@ -51,9 +50,13 @@ public abstract class TitleScreenMixin extends Screen implements Tweened {
 			cir.setReturnValue(true);
 		}
 	}
-
-	@WrapMethod(method = "extractRenderState")
-	private void wrap(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
+	//? if >=26.1 {
+	/*@WrapMethod(method = "extractRenderState")
+	private void wrap(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
+	*///? } else {
+	@WrapMethod(method = "render")
+	private void wrap(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
+	//?}
 		scaleTweener.update();
 		graphics.pose().pushMatrix();
 		graphics.pose().scaleAround(((float) scaleTweener.get()), width / 2F, height / 2F);

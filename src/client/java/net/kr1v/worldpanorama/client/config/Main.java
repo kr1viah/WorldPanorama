@@ -32,7 +32,7 @@ public class Main {
 	@SuppressWarnings("unused")
 	@Label
 	@Label("Misc")
-	public static final ConfigHotkeyPlus OPEN_MENU_HOTKEY = new ConfigHotkeyPlus("Open this gui", "J, C", "Keyboard combo to open this screen").setContext(KeybindSettings.Context.ANY).setPressCallback((_, _) -> {
+	public static final ConfigHotkeyPlus OPEN_MENU_HOTKEY = new ConfigHotkeyPlus("Open this gui", "J, C", "Keyboard combo to open this screen").setContext(KeybindSettings.Context.ANY).setPressCallback((ignored1, ignored2) -> {
 		MalilibApi.openScreenFor("world-panorama");
 		return true;
 	});

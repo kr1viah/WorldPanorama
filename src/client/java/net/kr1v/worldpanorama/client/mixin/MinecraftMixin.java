@@ -9,11 +9,9 @@ import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
@@ -57,10 +55,6 @@ public abstract class MinecraftMixin {
 	@Shadow
 	@Nullable
 	public LocalPlayer player;
-
-	@Shadow
-	@Final
-	public GameRenderer gameRenderer;
 
 	@Shadow
 	public abstract DeltaTracker getDeltaTracker();
@@ -110,9 +104,15 @@ public abstract class MinecraftMixin {
 	private void wrapop2(Minecraft instance, Screen screen, Operation<Void> original) {
 		if (Main.ENABLED.getBooleanValue()) {
 			original.call(instance, new Screen(Component.empty()) {
-				@Override
-				public void extractBackground(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+				//? if >=26.1 {
+				/*@Override
+				public void extractBackground(@NotNull net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 				}
+				*///? } else {
+				@Override
+				public void renderBackground(@NotNull net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float a) {
+				}
+				//? }
 			});
 			return;
 		}
@@ -126,7 +126,10 @@ public abstract class MinecraftMixin {
 	@Unique
 	private final Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
 
-	@Inject(method = "renderFrame", at = @At("HEAD"))
+	//? if <=1.21.11 {
+	@Inject(method = "runTick", at = @At("HEAD"))
+	//? } else
+	//@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen == null) {
 			WorldPanoramaClient.hasTitleScreenOpen = false;
@@ -137,7 +140,7 @@ public abstract class MinecraftMixin {
 				player.setXRot(((float) pitchTweener.get()));
 				if (Main.ROTATE_PANORAMA.getBooleanValue()) {
 					float a = getDeltaTracker().getRealtimeDeltaTicks();
-					float delta = (float) (a * gameRenderer.getGameRenderState().optionsRenderState.panoramaSpeed);
+					float delta = (float) (a * options.panoramaSpeed().get());
 					this.spin = Mth.wrapDegrees(this.spin + delta * 0.1f);
 					player.setYRot(spin);
 				} else {
@@ -168,11 +171,14 @@ public abstract class MinecraftMixin {
 			if (Main.GENERATE_NEW_EVERY_TIME.getBooleanValue()) {
 				try (var access = getLevelSource().createAccess(name)) {
 					access.deleteLevel();
-				} catch (IOException _) {
+				} catch (IOException ignored) {
 				}
 				createWorldOpenFlows().createFreshLevel(
 						name,
-						new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+						//? if >=26.1 {
+						/*new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+						*///? } else
+						new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
 						new WorldOptions(randomSeed(), true, false),
 						WorldPresets::createNormalWorldDimensions,
 						theTitleScreen
@@ -183,7 +189,10 @@ public abstract class MinecraftMixin {
 				} else {
 					createWorldOpenFlows().createFreshLevel(
 							name,
-							new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+							//? if >=26.1 {
+							/*new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+							 *///? } else
+							new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
 							new WorldOptions(randomSeed(), true, false),
 							WorldPresets::createNormalWorldDimensions,
 							theTitleScreen

@@ -44,17 +44,17 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	private float spin;
 
 	//? if <26.2 {
-	@Shadow
+	/*@Shadow
 	public abstract void gui.setScreen(@Nullable Screen gui.screen());
 
 	@Shadow
 	@Nullable
 	public Screen gui.screen();
-	//? } else {
-	/*@Shadow
+	*///? } else {
+	@Shadow
 	@Final
 	public Gui gui;
-	*///? }
+	//? }
 
 	@Shadow
 	public abstract WorldOpenFlows createWorldOpenFlows();
@@ -74,7 +74,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	public abstract DeltaTracker getDeltaTracker();
 
 	//~ if >=26.2 'Minecraft;setScreen' -> 'gui/Gui;setScreen'
-	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	@WrapOperation(method = "doWorldLoad", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
 	private void wrapop(@Coerce Object instance, Screen screen, Operation<Void> original) {
 		if (!WorldPanoramaClient.isLoadingPanoramaWorld)
 			original.call(instance, this.gui.screen());
@@ -84,7 +84,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	private void inject(Minecraft instance, Screen screen, Operation<Void> original) {
 		if (WorldPanoramaClient.isInTitleScreen && !WorldPanoramaClient.isLoadingPanoramaWorld) {
 			WorldPanoramaClient.isInTitleScreen = false;
-			this.setScreen(new ProgressScreen(true));
+			this.gui.setScreen(new ProgressScreen(true));
 			return;
 		}
 		if (WorldPanoramaClient.isLoadingPanoramaWorld) {
@@ -124,7 +124,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	*///? }
 
 	//~ if >=26.2 'Minecraft;setScreen' -> 'gui/Gui;setScreen'
-	@WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	@WrapOperation(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/Gui;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
 	private void wrapop2(@Coerce Object instance, Screen screen, Operation<Void> original) {
 		if (Main.ENABLED.getBooleanValue()) {
 			original.call(instance, new Screen(Component.empty()) {

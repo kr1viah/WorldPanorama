@@ -19,7 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(Gui.class)
 public abstract class GuiMixin {
 	//? >=26.2 {
-	/*@Shadow
+	@Shadow
 	public abstract void setScreen(Screen screen);
 
 	@Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
@@ -35,5 +35,5 @@ public abstract class GuiMixin {
 			((Tweened) ((TitleScreenHaver) Minecraft.getInstance()).world_panorama$getTitleScreen()).world_panorama$getTweener().snapToValue(0);
 		}
 	}
-	*///? }
+	//? }
 }

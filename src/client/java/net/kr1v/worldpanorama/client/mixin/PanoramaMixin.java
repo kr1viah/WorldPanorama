@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class PanoramaMixin {
 	//~ if >=26.1 'render' -> 'extractRenderState'
 	@Inject(method = "extractRenderState", at = @At("HEAD"), cancellable = true)
-	private void prevent(@Coerce Object graphics, int width, int height/*? if <26.2 {*/, boolean shouldSpin/*? }*/, CallbackInfo ci) {
+	private void prevent(@Coerce Object graphics, int width, int height/*? if <26.2 {*//*, boolean shouldSpin*//*? }*/, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue()) {
 			ci.cancel();
 		}

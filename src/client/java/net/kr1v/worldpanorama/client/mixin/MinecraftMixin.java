@@ -105,14 +105,14 @@ public abstract class MinecraftMixin {
 		if (Main.ENABLED.getBooleanValue()) {
 			original.call(instance, new Screen(Component.empty()) {
 				//? if >=26.1 {
-				/*@Override
+				@Override
 				public void extractBackground(@NotNull net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 				}
-				*///? } else {
-				@Override
+				//? } else {
+				/*@Override
 				public void renderBackground(@NotNull net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float a) {
 				}
-				//? }
+				*///? }
 			});
 			return;
 		}
@@ -127,9 +127,9 @@ public abstract class MinecraftMixin {
 	private final Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
 
 	//? if <=1.21.11 {
-	@Inject(method = "runTick", at = @At("HEAD"))
-	//? } else
-	//@Inject(method = "renderFrame", at = @At("HEAD"))
+	/*@Inject(method = "runTick", at = @At("HEAD"))
+	*///? } else
+	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && screen == null) {
 			WorldPanoramaClient.hasTitleScreenOpen = false;
@@ -176,9 +176,9 @@ public abstract class MinecraftMixin {
 				createWorldOpenFlows().createFreshLevel(
 						name,
 						//? if >=26.1 {
-						/*new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
-						*///? } else
-						new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
+						new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+						//? } else
+						//new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
 						new WorldOptions(randomSeed(), true, false),
 						WorldPresets::createNormalWorldDimensions,
 						theTitleScreen
@@ -190,9 +190,9 @@ public abstract class MinecraftMixin {
 					createWorldOpenFlows().createFreshLevel(
 							name,
 							//? if >=26.1 {
-							/*new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
-							 *///? } else
-							new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
+							new LevelSettings(name, GameType.CREATIVE, LevelSettings.DifficultySettings.DEFAULT, true, WorldDataConfiguration.DEFAULT),
+							 //? } else
+							//new LevelSettings(name, GameType.CREATIVE, false, net.minecraft.world.Difficulty.NORMAL, true, new net.minecraft.world.level.gamerules.GameRules(WorldDataConfiguration.DEFAULT.enabledFeatures()), WorldDataConfiguration.DEFAULT),
 							new WorldOptions(randomSeed(), true, false),
 							WorldPresets::createNormalWorldDimensions,
 							theTitleScreen

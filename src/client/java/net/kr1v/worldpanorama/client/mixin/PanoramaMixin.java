@@ -8,11 +8,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 //? if <=1.21.11 {
-@Mixin(net.minecraft.client.renderer.PanoramaRenderer.class)
-//? } else
-//@Mixin(net.minecraft.client.renderer.Panorama.class)
+/*@Mixin(net.minecraft.client.renderer.PanoramaRenderer.class)
+*///? } else
+@Mixin(net.minecraft.client.renderer.Panorama.class)
 public class PanoramaMixin {
-	@Inject(method = /*? if >=26.1 {*//*"extractRenderState"*//*? } else {*/"render"/*? }*/, at = @At("HEAD"), cancellable = true)
+	@Inject(method = /*? if >=26.1 {*/"extractRenderState"/*? } else {*//*"render"*//*? }*/, at = @At("HEAD"), cancellable = true)
 	private void prevent(@Coerce Object graphics, int width, int height, boolean shouldSpin, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue()) {
 			ci.cancel();

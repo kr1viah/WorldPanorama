@@ -51,12 +51,12 @@ public abstract class TitleScreenMixin extends Screen implements Tweened {
 		}
 	}
 	//? if >=26.1 {
-	/*@WrapMethod(method = "extractRenderState")
+	@WrapMethod(method = "extractRenderState")
 	private void wrap(net.minecraft.client.gui.GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
-	*///? } else {
-	@WrapMethod(method = "render")
+	//? } else {
+	/*@WrapMethod(method = "render")
 	private void wrap(net.minecraft.client.gui.GuiGraphics graphics, int mouseX, int mouseY, float a, Operation<Void> original) {
-	//?}
+	*///?}
 		scaleTweener.update();
 		graphics.pose().pushMatrix();
 		graphics.pose().scaleAround(((float) scaleTweener.get()), width / 2F, height / 2F);

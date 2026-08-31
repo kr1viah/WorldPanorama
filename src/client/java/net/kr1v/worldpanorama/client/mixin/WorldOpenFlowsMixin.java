@@ -8,6 +8,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 
 @Mixin(WorldOpenFlows.class)
 public class WorldOpenFlowsMixin {
@@ -23,8 +24,9 @@ public class WorldOpenFlowsMixin {
 			original.call(instance, screen);
 	}
 
+	//~ if >=26.2 'Minecraft;setScreen' -> 'gui/Gui;setScreen'
 	@WrapOperation(method = "openWorldLoadLevelStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
-	private void wrapop3(Minecraft instance, Screen screen, Operation<Void> original) {
+	private void wrapop3(@Coerce Object instance, Screen screen, Operation<Void> original) {
 		if (!WorldPanoramaClient.isLoadingPanoramaWorld)
 			original.call(instance, screen);
 	}

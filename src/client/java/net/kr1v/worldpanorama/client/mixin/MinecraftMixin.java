@@ -1,18 +1,18 @@
 package net.kr1v.worldpanorama.client.mixin;
 
 //~ if >=26.2 'this.setScreen' -> 'this.gui.setScreen' as _
-//~ if >=26.2 'this.screen' -> 'thisgui.screen()' as _
+//~ if >=26.2 'this.screen' -> 'this.gui.screen()' as _
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
-import net.kr1v.worldpanorama.client.interfaces.SingleplayerStarter;
-import net.kr1v.worldpanorama.client.interfaces.TitleScreenHaver;import net.kr1v.worldpanorama.client.util.Tweener;
+import net.kr1v.worldpanorama.client.interfaces.*;
+import net.kr1v.worldpanorama.client.util.Tweener;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
-import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.player.LocalPlayer;
@@ -45,11 +45,11 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 
 	//? if <26.2 {
 	/*@Shadow
-	public abstract void gui.setScreen(@Nullable Screen gui.screen());
+	public abstract void setScreen(@Nullable Screen screen);
 
 	@Shadow
 	@Nullable
-	public Screen gui.screen();
+	public Screen screen;
 	*///? } else {
 	@Shadow
 	@Final
@@ -107,17 +107,17 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 		theTitleScreen = screen;
 	}
 
-	//? if <26.1 {
+	//? if <26.2 {
 	/*@Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
-	private void inject2(Screen gui.screen(), CallbackInfo ci) {
+	private void inject2(Screen screen, CallbackInfo ci) {
 		if ((screen instanceof TitleScreen titleScreen) && Main.ENABLED.getBooleanValue() && !WorldPanoramaClient.isInTitleScreen) {
 			WorldPanoramaClient.isInTitleScreen = true;
-			startSingleplayer(Main.WORLD_NAME.getStringValue());
+			world_panorama$startSingleplayer(Main.WORLD_NAME.getStringValue());
 			theTitleScreen = titleScreen;
 		}
 		if (screen instanceof PauseScreen && Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen) {
 			ci.cancel();
-			gui.setScreen(theTitleScreen);
+			setScreen(theTitleScreen);
 			((Tweened) theTitleScreen).world_panorama$getTweener().snapToValue(0);
 		}
 	}
@@ -155,7 +155,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	//? } else
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
-		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && gui.screen() == null) {
+		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && this.gui.screen() == null) {
 			WorldPanoramaClient.hasTitleScreenOpen = false;
 		}
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && WorldPanoramaClient.hasTitleScreenOpen) {
@@ -190,7 +190,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 
 	@Unique
 	private void setHudHidden(boolean b) {
-		//? <26.1 {
+		//? <26.2 {
 		//options.hideGui = b;
 		//? } else {
 		if (this.gui.hud.isHidden() != b) this.gui.hud.toggle();
@@ -199,7 +199,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 
 	@Unique
 	private boolean getHudHidden() {
-		//? <26.1 {
+		//? <26.2 {
 		//return options.hideGui;
 		//? } else {
 		return this.gui.hud.isHidden();
@@ -228,7 +228,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 				);
 			} else {
 				if (getLevelSource().levelExists(name)) {
-					createWorldOpenFlows().openWorld(name, () -> gui.setScreen(new TitleScreen()));
+					createWorldOpenFlows().openWorld(name, () -> this.gui.setScreen(new TitleScreen()));
 				} else {
 					createWorldOpenFlows().createFreshLevel(
 							name,

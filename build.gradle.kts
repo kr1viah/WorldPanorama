@@ -45,11 +45,13 @@ dependencies {
     annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
 
     modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
+
+    modRuntimeOnly("net.kr1v:devutils:+:${project.property("minecraft_version")}")
 }
 
 val javaVersion = when (sc.current.parsed.matches(">=26.1")) {
-    true -> { JavaVersion.VERSION_25 }
-    false -> { JavaVersion.VERSION_21 }
+    true ->  JavaVersion.VERSION_25
+    false -> JavaVersion.VERSION_21
 }
 
 tasks.processResources {
@@ -61,6 +63,9 @@ tasks.processResources {
         }
         "1.21.11" -> {
             "1.21.11"
+        }
+        "26.2" -> {
+            "26.2"
         }
         else -> {
             throw GradleException("Version not specified!")
@@ -104,10 +109,8 @@ tasks.jar {
 	}
 }
 
-val lastTask: Task = (if (sc.current.parsed.matches("<=1.21.11")) tasks.named<Task>("remapJar") else tasks.jar).get()
-
 publishMods {
-    file.set((lastTask as AbstractArchiveTask).archiveFile)
+    file.set(loomx.modJar.get().archiveFile)
     type.set(STABLE)
     modLoaders.add("fabric")
 

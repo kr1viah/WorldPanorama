@@ -150,9 +150,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	@Unique
 	private final Tweener pitchTweener = new Tweener(Main.PANORAMA_PITCH::getFloatValue, Main.ANIMATION_SPEED::getFloatValue);
 
-	//? if <=1.21.11 {
-	//@Inject(method = "runTick", at = @At("HEAD"))
-	//? } else
+	//~ if <=1.21.11 'renderFrame' -> 'runTick'
 	@Inject(method = "renderFrame", at = @At("HEAD"))
 	private void doThing(boolean advanceGameTime, CallbackInfo ci) {
 		if (Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen && this.gui.screen() == null) {
@@ -164,7 +162,7 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 				player.setXRot(((float) pitchTweener.get()));
 				if (Main.ROTATE_PANORAMA.getBooleanValue()) {
 					float a = getDeltaTracker().getRealtimeDeltaTicks();
-					float delta = (float) (a * options.panoramaSpeed().get());
+					float delta = a * options.panoramaSpeed().get().floatValue();
 					this.spin = Mth.wrapDegrees(this.spin + delta * 0.1f);
 					player.setYRot(spin);
 				} else {

@@ -5,7 +5,7 @@ package net.kr1v.worldpanorama.client.mixin;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import net.kr1v.worldpanorama.client.WorldPanoramaClient;
+import com.llamalad7.mixinextras.sugar.Local;import net.kr1v.worldpanorama.client.WorldPanoramaClient;
 import net.kr1v.worldpanorama.client.config.Main;
 import net.kr1v.worldpanorama.client.interfaces.*;
 import net.kr1v.worldpanorama.client.util.Tweener;
@@ -16,7 +16,7 @@ import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.*;
 import net.minecraft.client.gui.screens.worldselection.WorldOpenFlows;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
+import net.minecraft.client.server.IntegratedServer;import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
@@ -247,4 +247,13 @@ public abstract class MinecraftMixin implements SingleplayerStarter, TitleScreen
 	private boolean isWorldNameValid(@Nullable String name) {
 		return name != null && !name.isBlank();
 	}
+
+	//? if 1.21.11 {
+	/*@Inject(method = "disconnect(Lnet/minecraft/client/gui/screens/Screen;ZZ)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setScreen(Lnet/minecraft/client/gui/screens/Screen;)V"))
+	private void inject(Screen screen, boolean bl, boolean bl2, CallbackInfo ci, @Local IntegratedServer integratedServer) {
+		if (WorldPanoramaClient.isInTitleScreen) {
+			integratedServer.halt(false);
+		}
+	}
+	*///? }
 }

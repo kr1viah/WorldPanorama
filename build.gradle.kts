@@ -45,8 +45,6 @@ dependencies {
     annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
 
     modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")
-
-    modRuntimeOnly("net.kr1v:devutils:+:${project.property("minecraft_version")}")
 }
 
 val javaVersion = when (sc.current.parsed.matches(">=26.1")) {
@@ -61,15 +59,7 @@ tasks.processResources {
         "26.1.2" -> {
             "~26.1"
         }
-        "1.21.11" -> {
-            "1.21.11"
-        }
-        "26.2" -> {
-            "26.2"
-        }
-        else -> {
-            throw GradleException("Version not specified!")
-        }
+        else -> sc.current.version
     }
 	inputs.property("version", version)
 	inputs.property("java_version", javaVersion)

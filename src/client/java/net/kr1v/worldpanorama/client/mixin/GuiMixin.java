@@ -26,7 +26,7 @@ public abstract class GuiMixin {
 	private void inject2(Screen screen, CallbackInfo ci) {
 		if ((screen instanceof TitleScreen titleScreen) && Main.ENABLED.getBooleanValue() && !WorldPanoramaClient.isInTitleScreen) {
 			WorldPanoramaClient.isInTitleScreen = true;
-			((SingleplayerStarter) Minecraft.getInstance()).world_panorama$startSingleplayer(Main.WORLD_NAME.getStringValue());
+			((SingleplayerStarter) Minecraft.getInstance()).world_panorama$startSingleplayer(WorldPanoramaClient.getWorldName());
 			((TitleScreenHaver) Minecraft.getInstance()).world_panorama$setTitleScreen(titleScreen);
 		}
 		if (screen instanceof PauseScreen && Main.ENABLED.getBooleanValue() && WorldPanoramaClient.isInTitleScreen) {

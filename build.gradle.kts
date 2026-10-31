@@ -41,7 +41,9 @@ dependencies {
 	modImplementation("net.fabricmc.fabric-api:fabric-api:${project.property("fabric_api_version")}")
 
     modImplementation("fi.dy.masa.malilib:malilib-fabric-${project.property("malilib_version")}")
-    modImplementation("net.kr1v:malilib-api:${project.property("malilib_api_version")}")
+    modImplementation("net.kr1v:malilib-api:${project.property("malilib_api_version")}") {
+        exclude("fi.dy.masa.malilib")
+    }
     annotationProcessor("net.kr1v:malilib-api-processor:1.0.0")
 
     modImplementation("com.terraformersmc:modmenu:${project.property("modmenu_version")}")

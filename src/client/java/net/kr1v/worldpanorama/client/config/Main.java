@@ -1,14 +1,14 @@
 package net.kr1v.worldpanorama.client.config;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
 import fi.dy.masa.malilib.hotkeys.KeybindSettings;
 import kr1v.malilibApi.MalilibApi;
 import kr1v.malilibApi.annotation.Config;
 import kr1v.malilibApi.annotation.Label;
 import kr1v.malilibApi.config._new.boring.ConfigFloat;
-import kr1v.malilibApi.config.plus.ConfigBooleanPlus;
-import kr1v.malilibApi.config.plus.ConfigHotkeyPlus;
-import kr1v.malilibApi.config.plus.ConfigIntegerPlus;
-import kr1v.malilibApi.config.plus.ConfigStringPlus;
+import kr1v.malilibApi.config.plus.*;
+import net.minecraft.client.Minecraft;
 
 @Config("world-panorama")
 public class Main {
@@ -21,7 +21,28 @@ public class Main {
 	public static final ConfigFloat PANORAMA_PITCH = new ConfigFloat("Panorama pitch", 10, -90, 90, "Vertical rotation when in the title screen");
 	public static final ConfigBooleanPlus HIDE_HUD = new ConfigBooleanPlus("Hide HUD", true, "Hides all GUI elements when in the title screen");
 	public static final ConfigIntegerPlus PANORAMA_FOV = new ConfigIntegerPlus("FOV", 30, 30, 110, "FOV used only when in a title screen");
-	public static final ConfigFloat ANIMATION_SPEED = new ConfigFloat("Animation Speed", 20, 1, 30, "How fast the the FOV, pitch, and screen scale transitions will be");
+	public static final ConfigFloat ANIMATION_SPEED = new ConfigFloat("Animation speed", 20, 1, 30, "How fast the the FOV, pitch, and screen scale transitions will be");
+	public static final ConfigDoublePlus ROTATION_SPEED = new ConfigDoublePlus("Panorama rotation speed", 100, 0, 100, "Matches the Minecraft option") {
+		@Override
+		public void setDoubleValue(double value) {
+			Minecraft.getInstance().options.panoramaSpeed().set(value / 100);
+			super.setDoubleValue(value);
+		}
+
+		@Override
+		public double getDoubleValue() {
+			return Minecraft.getInstance().options.panoramaSpeed().get() * 100;
+		}
+
+		@Override
+		public JsonElement getAsJsonElement() {
+			return new JsonPrimitive(Minecraft.getInstance().options.panoramaSpeed().get() * 100);
+		}
+
+		@Override
+		public void setValueFromJsonElement(JsonElement element) {
+		}
+	};
 
 	@Label
 	@Label("World")
